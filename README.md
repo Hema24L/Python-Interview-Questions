@@ -511,3 +511,109 @@ Yes, in Python3, `return` statement can be included inside a generator. Doing so
 Must use a custom iterator class when complex object-oriented behavior such as adding extra custom methods, maintaining shared attributes across instances or when need the ability to easily reset or modify the internal state of the stream from the outside.
 
 ---
+## Decorators
+- A design pattern that allows you to modify or extend the behavior of a function or class without permanently changing its actual source code.
+- It is simply a function that takes another function as an argument, adds some functionality and returns as modified function.
+### Basic Decorator syntax
+- Python uses the `@` symbol to apply a decorator to a function.
+  ```
+  # define the decorator function
+  def my_decorator(func):
+    def wrapper():
+      print("Something is happening BEFORE the function is called")
+      func()
+      print("Something is happening AFTER the function is called")
+    return wrapper
+
+  @my_decorator
+  def say_hello():
+    print("Hello")
+
+  say_hello()
+
+  #Output
+  # Something is happening BEFORE the function is called.
+  # Hello!
+  # Something is happening AFTER the function is called.
+  ```
+### Decorating functions that Accept arguments
+- If the function being decorated accepts inputs, the inner `wrapper` function inside your decorator must use `*args` and `**kwargs` so it can accept any arbitrary arguments.
+  ```
+  def log_decorator(func):
+    def wrapper(*args, **kwargs):
+        print(f"Running function '{func.__name__}' with arguments {args}")
+        result = func(*args, **kwargs)
+        print(f"Function '{func.__name__}' finished execution.")
+        return result
+    return wrapper
+
+  @log_decorator
+  def greet(name, age):
+    return f"Hi {name}, you are {age} years old."
+
+  print(greet("Alice", 28))
+  ```
+### Real-world use cases
+- Why to use a decorator in a real project?
+  - Logging: Tracking when specific functions are called and with what parameters.
+  - Authentication/Authorization: Checking if a user is logged in before allowing them to access a specific route or view(common in Flask/Django).
+  - Caching/Memorization: Storing the results of expensive function calls so they don't run twice with the same inputs.
+  - Timing: Measuring how long a function takes to execute for performance profiling.
+### Can I chain multiple decorators together?
+Yes. Can stack them on top of each other. They execute in order from top to bottom.
+```
+@decorator_one
+@decorator_two
+def my_func():
+    pass
+```
+---
+## Multithreading
+- A programming technique that allows a single CPU core to execute multiple tasks(threads) concurrently by rapidly switching between them.
+### Core paradox in Python: The GIL(Global Interpreter Lock)
+- GIL constraint: Python has a strict security lock called the GIL. It ensures that only one thread can execute Python code at any given moment, even if the computer has 8 or 16 CPU cores.
+- Concurrency illusion: Instead of running truly in parallel, Python threads constantly pause and take turns on a single CPU core. It happens so fast that it looks parallel to the human eye.
+### When to use Multithreading (I/O bound tasks)
+- Because of GIL, multithreading will not speed up heavy mathematical calculations(CPU-Bound tasks).
+- However, it is highly effective for I/O bound tasks where the program spends most of its time waiting for external networks or hardware.
+- Good Use Cases
+    - Web scraping
+    - Downloading multiple files simultaneously
+    - Reading and writing large numbers of files to a hard drive
+    - Making API requests to external databases.
+```
+import threading
+import time
+
+def worker_task(name, delay):
+    print(f"Worker {name} started.")
+    time.sleep(delay)  # Simulating a network or file delay
+    print(f"Worker {name} finished after {delay}s.")
+
+# Create the threads
+thread1 = threading.Thread(target=worker_task, args=("A", 2))
+thread2 = threading.Thread(target=worker_task, args=("B", 4))
+
+# Start execution (they run concurrently)
+thread1.start()
+thread2.start()
+
+# Wait for both threads to completely finish before moving forward
+thread1.join()
+thread2.join()
+
+print("All threads finished. Moving back to main program!")
+```
+### What is the difference between Multithreading and Multiprocessing?
+- Multithreading: Shares the exact same memory space. It is lightweight but restricted by the GIL. Best for I/O bound tasks.
+- Multiprocessing: Spawns entirely separate instances of Python, each with its own memory space and its own GIL. It allows true parallel execution across multiple CPU cores. Best for CPU bound tasks(e.g., video rendering, machine learning training, heavy math).
+### Race condition
+- Occurs when two or more threads try to modify the exact same shared variable at the same time. Because their execution order is unpredictable, the final data can become corrupted.
+- Solution: Use a `threading.Lock()`. A lock forces a thread to wait its turn before modifying shared data.
+  ```
+  lock = threading.Lock()
+
+  with lock:
+      # Only one thread can enter this block at a time
+      shared_counter += 1 
+  ```
