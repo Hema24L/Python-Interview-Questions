@@ -617,3 +617,14 @@ print("All threads finished. Moving back to main program!")
       # Only one thread can enter this block at a time
       shared_counter += 1 
   ```
+---
+## Difference between Flask and Django
+|Features|Flask|Django|
+|---|---|---|
+|Framework type|Micro-framework|Full-stack framework|
+|Philosophy|Minimalist, flexible, explicit|Batteries-included structured|
+|Admin Panel|No(Must build or use extensions)|Built-in automatically|
+|Database/ORM|None built-in(usually uses SQLAlchemy)|Built-in powerful Django ORM|
+|Project structure|Developer decided the layout|Strict, predefined layout|
+|Best for|Small apps, microservices, REST APIs|Large, complex enterpirse applications|
+  
